@@ -1,0 +1,34 @@
+{
+  "name": "mapbox-3d-tiles",
+  "version": "1.0.0",
+  "author": "Jianshun Yang",
+  "license": "MIT",
+  "description": "Integrate NASA's 3d-tiles-renderer with mapbox-gl to enable 3D tiles rendering and provide plugin functionalities.",
+  "keywords": [
+    "mapbox-gl",
+    "3dtiles",
+    "3d-tiles-renderer",
+    "threejs"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "files": [
+    "src/*"
+  ],
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "start": "vite --config ./vite.config.js",
+    "build-examples": "vite build --config ./vite.config.js"
+  },
+  "dependencies": {
+    "3d-tiles-renderer": "^0.4.6",
+    "mapbox-gl": "^3.10.0"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  }
+}
