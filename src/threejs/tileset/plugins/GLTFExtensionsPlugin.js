@@ -1,6 +1,5 @@
-
 // 为了解决 gltf 加载ktx2压缩格式图片时，无法正常加载的 bug
-// 
+//
 // 问题说明：
 // 当 gltf 中有 ktx2 格式的图片，但是没有添加 KHR_texture_basisu 的 extension 时，
 // 使用 ktx2Loader 加载 texture，否则使用 TextureLoader
@@ -14,105 +13,95 @@
 // 3. 需要 "3d-tiles-renderer/plugins" 中的 GLTFExtensionsPlugin 替换成本文件中的 GLTFExtensionsPlugin
 // 4. 然后在使用时，将 GLTFLoader 实例化时传入 ktx2Loader 实例，即可正常加载 ktx2 格式的图片
 
-
 // import {GLTFExtensionsPlugin} from "3d-tiles-renderer/plugins";
 // export {GLTFExtensionsPlugin};
 
 // import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { GLTFLoader } from './gltf/GLTFLoader.js' 
+import { GLTFLoader } from './gltf/GLTFLoader.js';
 
 import { GLTFStructuralMetadataExtension } from './gltf/GLTFStructuralMetadataExtension.js';
 import { GLTFMeshFeaturesExtension } from './gltf/GLTFMeshFeaturesExtension.js';
 import { GLTFCesiumRTCExtension } from './gltf/GLTFCesiumRTCExtension.js';
 
-
 export class GLTFExtensionsPlugin {
+    constructor(options) {
+        options = {
+            metadata: true,
+            rtc: true,
 
-	constructor( options ) {
+            plugins: [],
 
-		options = {
-			metadata: true,
-			rtc: true,
+            dracoLoader: null,
+            ktxLoader: null,
+            meshoptDecoder: null,
+            autoDispose: true,
+            ...options,
+        };
 
-			plugins: [],
+        this.tiles = null;
 
-			dracoLoader: null,
-			ktxLoader: null,
-			meshoptDecoder: null,
-			autoDispose: true,
-			...options,
-		};
+        this.metadata = options.metadata;
+        this.rtc = options.rtc;
+        this.plugins = options.plugins;
 
-		this.tiles = null;
+        this.autoDispose = options.autoDispose;
+        this.dracoLoader = options.dracoLoader;
+        this.ktxLoader = options.ktxLoader;
+        this.meshoptDecoder = options.meshoptDecoder;
+        this._gltfRegex = /\.(gltf|glb)$/g;
+        this._dracoRegex = /\.drc$/g;
+        this._loader = null;
+    }
 
-		this.metadata = options.metadata;
-		this.rtc = options.rtc;
-		this.plugins = options.plugins;
+    init(tiles) {
+        const loader = new GLTFLoader(tiles.manager);
+        if (this.dracoLoader) {
+            loader.setDRACOLoader(this.dracoLoader);
+            tiles.manager.addHandler(this._dracoRegex, this.dracoLoader);
+        }
 
-		this.autoDispose = options.autoDispose;
-		this.dracoLoader = options.dracoLoader;
-		this.ktxLoader = options.ktxLoader;
-		this.meshoptDecoder = options.meshoptDecoder;
-		this._gltfRegex = /\.(gltf|glb)$/g;
-		this._dracoRegex = /\.drc$/g;
-		this._loader = null;
+        if (this.ktxLoader) {
+            loader.setKTX2Loader(this.ktxLoader);
+        }
 
-	}
+        if (this.meshoptDecoder) {
+            loader.setMeshoptDecoder(this.meshoptDecoder);
+        }
 
-	init( tiles ) {
+        if (this.rtc) {
+            loader.register(() => new GLTFCesiumRTCExtension());
+        }
 
-		const loader = new GLTFLoader( tiles.manager );
-		if ( this.dracoLoader ) {
+        if (this.metadata) {
+            loader.register(() => new GLTFStructuralMetadataExtension());
+            loader.register(() => new GLTFMeshFeaturesExtension());
+        }
 
-			loader.setDRACOLoader( this.dracoLoader );
-			tiles.manager.addHandler( this._dracoRegex, this.dracoLoader );
+        this.plugins.forEach((plugin) => loader.register(plugin));
 
-		}
+        tiles.manager.addHandler(this._gltfRegex, loader);
+        this.tiles = tiles;
+        this._loader = loader;
+    }
 
-		if ( this.ktxLoader ) {
+    dispose() {
+        this.tiles.manager.removeHandler(this._gltfRegex);
+        this.tiles.manager.removeHandler(this._dracoRegex);
+        if (this.autoDispose) {
+            this.ktxLoader.dispose();
+            this.dracoLoader.dispose();
+        }
+    }
 
-			loader.setKTX2Loader( this.ktxLoader );
-
-		}
-
-		if ( this.meshoptDecoder ) {
-
-			loader.setMeshoptDecoder( this.meshoptDecoder );
-
-		}
-
-		if ( this.rtc ) {
-
-			loader.register( () => new GLTFCesiumRTCExtension() );
-
-		}
-
-		if ( this.metadata ) {
-
-			loader.register( () => new GLTFStructuralMetadataExtension() );
-			loader.register( () => new GLTFMeshFeaturesExtension() );
-
-		}
-
-		this.plugins.forEach( plugin => loader.register( plugin ) );
-
-		tiles.manager.addHandler( this._gltfRegex, loader );
-		this.tiles = tiles;
-		this._loader = loader;
-
-	}
-
-	dispose() {
-
-		this.tiles.manager.removeHandler( this._gltfRegex );
-		this.tiles.manager.removeHandler( this._dracoRegex );
-		if ( this.autoDispose ) {
-
-			this.ktxLoader.dispose();
-			this.dracoLoader.dispose();
-
-		}
-
-	}
-
+    disposeTile(tile) {
+        const cached = tile.cached;
+        if (cached.scene) {
+            const scene = cached.scene;
+            scene.traverse((child) => {
+                if (child.dispose) {
+                    child.dispose();
+                }
+            });
+        }
+    }
 }

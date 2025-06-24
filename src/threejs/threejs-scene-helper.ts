@@ -1,193 +1,150 @@
-import {
-  type Map as MapboxMap,
-  MercatorCoordinate,
-  LngLatLike,
-} from "mapbox-gl";
+import { type Map as MapboxMap } from 'mapbox-gl';
 
-import {
-  Scene,
-  DirectionalLight,
-  AmbientLight,
-  WebGLRenderer,
-  PerspectiveCamera,
-  Vector3,
-  Quaternion,
-  Euler,
-  Matrix4,
-  Group,
-} from "three";
+import { Scene, PerspectiveCamera, Matrix4, Group, EquirectangularReflectionMapping, DirectionalLight, AmbientLight, Vector3, Quaternion, Euler } from 'three';
+
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import ThreejsUtils from './threejs-utils';
 
 export default class ThreejsSceneHelper {
-    
-  // 创建 threejs 实例， 需要传入 map 和 gl 上下文
-  getThreejsInstance({
-    map,
-    gl,
-  }: {
-    map: MapboxMap & { __threejs?: WebGLRenderer | null };
-    gl: WebGL2RenderingContext;
-  }): WebGLRenderer {
-    // Only create one threejs instance per context
-    if (map.__threejs) {
-      return map.__threejs;
+    // 创建场景
+    createScene(creatLight: boolean = true): Scene {
+        const scene = new Scene();
+
+        if (creatLight) {
+            // lights
+            const dirLight = new DirectionalLight(0xffffff, 4);
+            dirLight.position.set(1, 2, 3);
+            scene.add(dirLight);
+
+            const ambLight = new AmbientLight(0xffffff, 0.2);
+            scene.add(ambLight);
+        }
+
+        return scene;
     }
 
-    let renderer: WebGLRenderer = new WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      canvas: map.getCanvas(),
-      context: gl,
-    });
+    // 创建渲染组
+    createGroup(parent: Scene | Group, name: string): Group {
+        const group = new Group();
+        group.name = name;
+        parent.add(group);
+        return group;
+    }
 
-    renderer.shadowMap.enabled = true;
-    renderer.autoClear = false;
+    // 创建相机， 默认使用 PerspectiveCamera
+    createCamera(sceneRoot: Group, name: string): PerspectiveCamera {
+        const camera = new PerspectiveCamera();
+        camera.name = name;
 
-    map.__threejs = renderer;
+        const group = new Group();
+        group.name = name + '-parent';
+        group.add(camera);
 
-    return renderer;
-  }
+        sceneRoot.add(group);
+        return camera;
+    }
 
-  // 移除 threejs 实例
-  private removeThreejsInstance(
-    map: MapboxMap & { __threejs?: WebGLRenderer | null }
-  ) {
-    map.__threejs = null;
-  }
+    _calcProjectionMatrices(transform) {
+        const offset = transform.centerOffset;
+        let cameraToClip;
 
-  // 创建场景
-  createScene(): Scene {
-    const scene = new Scene();
-    
-	// lights
-	const dirLight = new DirectionalLight( 0xffffff, 4 );
-	dirLight.position.set( 1, 2, 3 );
-	scene.add( dirLight );
+        const cameraToClipPerspective = transform._camera.getCameraToClipPerspective(transform._fov, transform.width / transform.height, transform._nearZ, transform._farZ);
+        // Apply offset/padding
+        cameraToClipPerspective[8] = (-offset.x * 2) / transform.width;
+        cameraToClipPerspective[9] = (offset.y * 2) / transform.height;
 
-	const ambLight = new AmbientLight( 0xffffff, 0.2 );
-	scene.add( ambLight );
+        if (transform.isOrthographic) {
+            const OrthographicPitchTranstionValue = 15;
+            const lerp = (x: number, y: number, t: number) => {
+                return (1 - t) * x + t * y;
+            };
+            const easeIn = (x: number) => {
+                return x * x * x * x * x;
+            };
+            const lerpMatrix = (out, a, b, value: number) => {
+                for (let i = 0; i < 16; i++) {
+                    out[i] = lerp(a[i], b[i], value);
+                }
 
-    return scene;
-  }
+                return out;
+            };
 
-  // 创建渲染组
-  createGroup(parent: Scene | Group, name: string): Group {
-    const group = new Group();
-    group.name = name;
-    parent.add(group);
-    return group;
-  }
+            const cameraToCenterDistance = ((0.5 * transform.height) / Math.tan(transform._fov / 2.0)) * 1.0;
 
-  // 创建相机， 默认使用 PerspectiveCamera
-  createCamera(
-    sceneRoot: Group,
-    name: string
-  ): PerspectiveCamera {
-    const camera = new PerspectiveCamera();
-    camera.name = name;
+            // Calculate bounds for orthographic view
+            let top = cameraToCenterDistance * Math.tan(transform._fov * 0.5);
+            let right = top * transform.aspect;
+            let left = -right;
+            let bottom = -top;
+            // Apply offset/padding
+            right -= offset.x;
+            left -= offset.x;
+            top += offset.y;
+            bottom += offset.y;
 
-    const group = new Group();
-    group.name = name + "-parent";
-    group.add(camera);
+            cameraToClip = transform._camera.getCameraToClipOrthographic(left, right, bottom, top, transform._nearZ, transform._farZ);
 
-    sceneRoot.add(group);
-    return camera;
-  }
+            const mixValue = transform.pitch >= OrthographicPitchTranstionValue ? 1.0 : transform.pitch / OrthographicPitchTranstionValue;
+            lerpMatrix(cameraToClip, cameraToClip, cameraToClipPerspective, easeIn(mixValue));
+        } else {
+            cameraToClip = cameraToClipPerspective;
+        }
 
-  // 更新世界矩阵， 需要根据 map 的中心点计算世界矩阵，将相对中心的坐标转换到墨卡托坐标系中
-  updateWorldMatrix(
-    map: MapboxMap,
-    refCenter: LngLatLike | null = null
-  ): Matrix4 {
-    const mapCenter = refCenter ? refCenter : map.getCenter();
+        return new Matrix4().fromArray(cameraToClip);
+    }
 
-    // Calculate mercator coordinates and scale
-    const worldOriginMercator = MercatorCoordinate.fromLngLat(mapCenter);
-    const worldScale = worldOriginMercator.meterInMercatorCoordinateUnits();
-    const worldRotate = [0, 0, 0];
+    // 更新相机矩阵，需要将 mapbox 的矩阵转换为 threejs 的矩阵
+    // 转换过程中，需要将 viewMatrix 和 projectionMatrix 拆分， 以便设置正确的 view 和 projection 矩阵
+    updateCameraForRender(camera: PerspectiveCamera, map: MapboxMap, matrix: number[], worldMatrix: Matrix4, worldMatrixInv: Matrix4) {
+        const mapMatrix = new Matrix4().fromArray(matrix);
+        const mvpMatrix = new Matrix4().multiplyMatrices(mapMatrix, worldMatrix);
 
-    // Calculate world matrix
-    const worldMatrix = new Matrix4();
-    worldMatrix.compose(
-      new Vector3(
-        worldOriginMercator.x,
-        worldOriginMercator.y,
-        worldOriginMercator.z
-      ),
-      new Quaternion().setFromEuler(
-        new Euler(worldRotate[0], worldRotate[1], worldRotate[2])
-      ),
-      new Vector3(worldScale, -worldScale, worldScale)
-    );
+        // 计算投影矩阵
+        // camera.fov = ThreejsUtils.radToDeg(map.transform.fovY);
+        camera.fov = ThreejsUtils.radToDeg(map.transform.fovX);
+        camera.aspect = map.transform.aspect;
+        camera.near = map.transform._nearZ;
+        camera.far = map.transform._farZ;
+        // camera.updateProjectionMatrix();
 
-    return worldMatrix;
-  }
+        // 基于 mapbox 的 transform 计算投影矩阵
+        const transform = map.transform;
+        this._calcProjectionMatrices(transform);
+        const cameraToClip = this._calcProjectionMatrices(transform);
+        camera.projectionMatrix.copy(cameraToClip);
+        camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
 
-  private toScenePositionMercator(
-    positionMercator: MercatorCoordinate,
-    worldMatrixInv: Matrix4
-  ): Vector3 {
-    const positionRef = new Vector3(
-      positionMercator.x,
-      positionMercator.y,
-      positionMercator.z
-    ).applyMatrix4(worldMatrixInv);
-    return positionRef;
-  }
+        const projectionMatrixInverse = camera.projectionMatrixInverse;
 
-  private toMapPositionMercator(
-    position: Vector3,
-    worldMatrix: Matrix4
-  ): MercatorCoordinate {
-    const positionMercator = position.applyMatrix4(worldMatrix);
+        // 计算相机矩阵
+        const viewMatrix = new Matrix4().multiplyMatrices(projectionMatrixInverse, mvpMatrix);
+        const viewMatrixInvert = viewMatrix.clone().invert();
+        camera.matrixWorld.copy(viewMatrixInvert);
+        camera.matrixWorldInverse.copy(viewMatrix);
+        camera.matrixAutoUpdate = false;
+        camera.matrixWorldAutoUpdate = false;
 
-    return new MercatorCoordinate(
-      positionMercator.x,
-      positionMercator.y,
-      positionMercator.z
-    );
-  }
+        const position = new Vector3();
+        const quaternion = new Quaternion();
+        const scale = new Vector3();
+        camera.matrixWorld.decompose(position, quaternion, scale);
+        camera.position.set(position.x, position.y, position.z);
+        const euler = new Euler().setFromQuaternion(quaternion, 'YXZ');
+        camera.rotation.set(euler.x, euler.y, euler.z);
+    }
 
-  toScenePosition(position: LngLatLike, worldMatrixInv: Matrix4): Vector3 {
-    const positionMercator = MercatorCoordinate.fromLngLat(position);
-    return this.toScenePositionMercator(positionMercator, worldMatrixInv);
-  }
+    // 创建环境贴图， 支持通用的 hdr 贴图和官方的压缩 env 贴图
+    createEnvTexture(envTexture: string, scene: Scene) {
+        if (envTexture && envTexture.length > 3 && envTexture.indexOf('.hdr') === envTexture.length - 4) {
+            const rgbeLoader = new RGBELoader();
+            rgbeLoader.load(envTexture, (environmentMap) => {
+                environmentMap.mapping = EquirectangularReflectionMapping;
+                // scene.background = environmentMap;
+                // scene.backgroundRotation.x = Math.PI / 2;
 
-  toMapPosition(
-    position: Vector3,
-    worldMatrix: Matrix4
-  ): [number, number, number] {
-    const positionMercator = this.toMapPositionMercator(position, worldMatrix);
-    const lngLat = positionMercator.toLngLat();
-    const altitude = positionMercator.toAltitude();
-    return [lngLat.lng, lngLat.lat, altitude];
-  }
-
-  // 更新相机矩阵，需要将 mapbox 的矩阵转换为 threejs 的矩阵
-  // 转换过程中，需要将 viewMatrix 和 projectionMatrix 拆分， 以便设置正确的 view 和 projection 矩阵
-  updateCameraForRender(
-    camera: PerspectiveCamera,
-    map: MapboxMap,
-    matrix: number[],
-    worldMatrix: Matrix4,
-    worldMatrixInv: Matrix4
-  ) {
-    const mapMatrix = new Matrix4().fromArray(matrix);
-    const mvpMatrix = new Matrix4().multiplyMatrices(mapMatrix, worldMatrix);
-
-    // 计算投影矩阵
-    camera.fov = map.transform.fov;
-    camera.aspect = map.transform.aspect;
-    camera.near = map.transform._nearZ;
-    camera.far = map.transform._farZ;
-    camera.updateProjectionMatrix();
-    const projectionMatrixInverse = camera.projectionMatrixInverse;
-
-    // 计算相机矩阵
-    const viewMatrix = new Matrix4().multiplyMatrices(projectionMatrixInverse, mvpMatrix);
-    const viewMatrixInvert = viewMatrix.clone().invert();
-    camera.matrixWorld.copy(viewMatrixInvert);
-    camera.matrixWorldInverse.copy(viewMatrix);
-    camera.matrixAutoUpdate = false;
-    camera.matrixWorldAutoUpdate = false;
-  }
+                scene.environment = environmentMap;
+                scene.environmentRotation.x = Math.PI / 2;
+            });
+        }
+    }
 }
