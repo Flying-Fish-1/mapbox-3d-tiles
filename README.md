@@ -30,13 +30,16 @@
 
 ## 🚀 示例圖集 <a name = "demovideos"></a>
 
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114737316696722&bvid=BV19eK3znEJt&cid=30671307369&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
 
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114737215969119&bvid=BV1qsK3z4Eo5&cid=30669866445&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+[![](https://i0.hdslb.com/bfs/archive/5d1b146ba418aa9c9293b8c2c6a34ccc1db47056.jpg@672w_378h_1c.webp)](https://www.bilibili.com/video/BV19eK3znEJt/)
 
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114736997929491&bvid=BV1iuKGz4EDv&cid=30669800035&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+[![](https://i0.hdslb.com/bfs/archive/0b195aebb064cd5b2222faeda00e94308dc4dea6.jpg@672w_378h_1c.webp)](https://www.bilibili.com/video/BV1qsK3z4Eo5/)
 
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114736981087516&bvid=BV1ENKGzFEMa&cid=30669671409&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+
+[![](https://i0.hdslb.com/bfs/archive/e498bd9893b9e55fccbe59e865c113736d123b1e.jpg@672w_378h_1c.webp)](https://www.bilibili.com/video/BV1iuKGz4EDv/)
+
+[![](https://i0.hdslb.com/bfs/archive/31f36229e764addba673fcb48f8d421c063b5784.jpg@672w_378h_1c.webp)](https://www.bilibili.com/video/BV1ENKGzFEMa/)
+
 
 ## 🏁 示例使用 <a name = "getting_started"></a>
 
