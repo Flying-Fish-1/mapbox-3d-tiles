@@ -24,11 +24,19 @@
 
 ## 🚀 示例圖集 <a name = "demovideos"></a>
 
+- 加载大范围 tileset/3dgs 对比，点击图片，可跳转到 b 站查看相关视频。
+
+[![](https://i2.hdslb.com/bfs/archive/b61f14f13c154292a1aa0813b74363b9d3b1841c.jpg@672w_378h_1c.webp)](https://www.bilibili.com/video/BV1eyuBzuErq/)
+
+
 - 加载大范围 tileset，点击图片，可跳转到 b 站查看相关视频。
 
 [![](https://i0.hdslb.com/bfs/archive/5d1b146ba418aa9c9293b8c2c6a34ccc1db47056.jpg@672w_378h_1c.webp)](https://www.bilibili.com/video/BV19eK3znEJt/)
 
 - 加载大范围 3dgs，点击图片，可跳转到 b 站查看相关视频。
+
+[![](https://i1.hdslb.com/bfs/archive/1b5f45ff4232e7362b488fc8eb5818c0aba69829.jpg@672w_378h_1c.webp)](https://www.bilibili.com/video/BV17ZuqzrELp/)
+
 
 [![](https://i0.hdslb.com/bfs/archive/0b195aebb064cd5b2222faeda00e94308dc4dea6.jpg@672w_378h_1c.webp)](https://www.bilibili.com/video/BV1qsK3z4Eo5/)
 
@@ -59,6 +67,13 @@ map.on('load', function () {
     var tileset = scene.addTileset({
         id: 'test-tileset',
         url: tiles3DLayerUrl,
+    });
+
+    var tileset_3dgs = scene.addTileset({
+        id: 'test-tileset',
+        url: 'http://localhost:8804/splat-3dtiles/NNU_2_opt/tileset.json',
+        isGaussianSplatting: true, // 默认为 false，如果模型有3DGS效果，请设置为 true
+        maxGaussianSplatingCount: 4096 * 4096, // 当数据量大时，可调高到 8192 * 8192
     });
 
     scene.addModel({
