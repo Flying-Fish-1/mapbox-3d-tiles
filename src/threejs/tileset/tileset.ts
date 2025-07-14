@@ -1,4 +1,6 @@
-import { TilesRenderer } from '3d-tiles-renderer';
+// import { TilesRenderer } from '3d-tiles-renderer';
+import { TilesRendererEx as TilesRenderer } from './TilesRendererEx';
+
 import {
     DebugTilesPlugin,
     UnloadTilesPlugin,
@@ -10,15 +12,21 @@ import {
 import { GLTFExtensionsPlugin } from './plugins/GLTFExtensionsPlugin';
 import { TilesCachePlugin } from './plugins/TilesCachePlugin';
 import { UrlParamsPlugin } from './plugins/UrlParamsPlugin';
+import { FetchDataPlugin } from './plugins/FetchDataPlugin';
 
 import { LngLatLike } from 'mapbox-gl';
-import { WebGLRenderer, PerspectiveCamera, Box3, Vector3, Matrix4, Group, Sphere } from 'three';
+import { MathUtils, Box3, Vector3, Matrix4, Group, Sphere, Vector2 } from 'three';
 
-import ThreejsUtils from '../threejs-utils';
 import { LoaderUtils } from '../utils/LoaderUtils';
-import { GLTFGaussianSplattingExtension } from '../splats/GLTFGaussianSplattingExtension';
 import { SceneObject } from '../object/scene-object';
 import ThreejsSceneLayer from '../threejs-scene';
+// import { GLTFGaussianSplattingExtension } from '../splats/GLTFGaussianSplattingExtension';
+// import { GaussianSplattingTilesetPlugin } from '../splats/GaussianSplattingTilesetPlugin';
+// import { GLTFGaussianSplattingSpzExtension } from '../splats/GLTFGaussianSplattingSpzExtension';
+import { GLTFGaussianSplattingExtension } from '../splats1/GLTFGaussianSplattingExtension';
+import { GaussianSplattingTilesetPlugin } from '../splats1/GaussianSplattingTilesetPlugin';
+// import { GLTFGaussianSplattingSpzExtension } from '../splats1/GLTFGaussianSplattingSpzExtension';
+import { TilesPriorityPlugin } from './plugins/TilesPriorityPlugin';
 
 // color modes
 const NONE = 0;
@@ -57,7 +65,6 @@ export type TilesetDebugParams = {
 
 export type TilesetDisplayParams = {
     errorTarget: number;
-    errorThreshold: number;
     displayActiveTiles: boolean;
     autoDisableRendererCulling: boolean;
     maxDepth: number;
@@ -70,9 +77,18 @@ export type TilesetOptions = {
 
     dracoLoaderPath?: string;
     ktx2LoaderPath?: string;
+    meshoptDecoder?;
 
     debug?: TilesetDebugParams;
     display?: TilesetDisplayParams;
+
+    downloadMaxJobs?: number;
+    parseMaxJobs?: number;
+
+    isGaussianSplatting?: boolean;
+    maxGaussianSplatingCount?: number;
+
+    onLoadTileset?: (tileset: Tileset) => void;
 };
 
 export default class Tileset extends SceneObject {
@@ -104,21 +120,37 @@ export default class Tileset extends SceneObject {
 
         const dracoLoader = LoaderUtils.getDracoLoader(this.options.dracoLoaderPath);
         const ktxLoader = LoaderUtils.getKtxLoader(this.options.ktx2LoaderPath);
+        const meshoptDecoder = LoaderUtils.getMeshoptDecoder(this.options.meshoptDecoder);
         ktxLoader.detectSupport(renderer);
 
         const tiles = new TilesRenderer(this.options.url);
+
+        if (this.options.downloadMaxJobs) tiles.downloadQueue.maxJobs = this.options.downloadMaxJobs;
+        if (this.options.parseMaxJobs) tiles.parseQueue.maxJobs = this.options.parseMaxJobs;
+
         tiles.registerPlugin(new DebugTilesPlugin());
         tiles.registerPlugin(new UnloadTilesPlugin());
         tiles.registerPlugin(new TilesCachePlugin());
         tiles.registerPlugin(new UrlParamsPlugin());
+        tiles.registerPlugin(new FetchDataPlugin());
+        tiles.registerPlugin(new TilesPriorityPlugin());
         tiles.registerPlugin(new ImplicitTilingPlugin());
+
+        let plugins = [];
+        if (this.options.isGaussianSplatting) {
+            tiles.registerPlugin(new GaussianSplattingTilesetPlugin(renderer, camera, this.options.maxGaussianSplatingCount));
+            plugins.push((parser) => new GLTFGaussianSplattingExtension(parser, camera));
+            // plugins.push((parser) => new GLTFGaussianSplattingSpzExtension(parser, camera));
+        }
+
         tiles.registerPlugin(
             new GLTFExtensionsPlugin({
                 rtc: true,
                 autoDispose: false,
                 dracoLoader,
                 ktxLoader,
-                plugins: [(parser) => new GLTFGaussianSplattingExtension(parser, camera)],
+                meshoptDecoder,
+                plugins: plugins,
             }),
         );
 
@@ -133,6 +165,11 @@ export default class Tileset extends SceneObject {
         this.centerLngLat = undefined;
         tiles.addEventListener('load-tile-set', () => {
             this.updateTilesetTransform();
+
+            const { onLoadTileset } = this.options;
+            if (onLoadTileset) {
+                onLoadTileset(this);
+            }
         });
 
         this.tiles = tiles;
@@ -165,6 +202,7 @@ export default class Tileset extends SceneObject {
         if (!tiles) {
             return;
         }
+        tiles.group.updateMatrixWorld(true);
         tiles.update();
     }
 
@@ -183,37 +221,32 @@ export default class Tileset extends SceneObject {
 
         // update tiles center
 
-        let box = new Box3();
-        let sphere = new Sphere();
-        let center = new Vector3();
-        if (tiles.getBoundingBox(box)) {
-            box.getCenter(center);
-        } else if (tiles.getBoundingSphere(sphere)) {
-            center = sphere.center;
+        let centerLngLat = { lat: 0, lon: 0, height: 0 };
+
+        //@ts-ignore
+        const transform = tiles.root.transform;
+        if (transform) {
+            const position = new Vector3(transform[12], transform[13], transform[14]);
+            tiles.ellipsoid.getPositionToCartographic(position, centerLngLat);
         } else {
-            return;
+            let box = new Box3();
+            let sphere = new Sphere();
+            let center = new Vector3();
+            if (tiles.getBoundingBox(box)) {
+                box.getCenter(center);
+            } else if (tiles.getBoundingSphere(sphere)) {
+                center = sphere.center;
+            } else {
+                return;
+            }
+            tiles.ellipsoid.getPositionToCartographic(center, centerLngLat);
         }
 
-        let centerLngLat = { lat: 0, lon: 0, height: 0 };
-        centerLngLat = tiles.ellipsoid.getPositionToCartographic(center, centerLngLat);
-
-        const modelMatrix = tiles.ellipsoid.getEastNorthUpFrame(centerLngLat.lat, centerLngLat.lon, new Matrix4());
-
-        const fromFixedFrameMatrix = tiles.ellipsoid.getEastNorthUpFrame(ThreejsUtils.degToRad(refCenter[1]), ThreejsUtils.degToRad(refCenter[0]), new Matrix4());
-
-        const toFixedFrameMatrix = fromFixedFrameMatrix.invert();
-        const refMatrix = toFixedFrameMatrix.multiply(modelMatrix);
-        // refMatrix.decompose(
-        //   rootGroup.position,
-        //   rootGroup.quaternion,
-        //   rootGroup.scale
-        // );
-        // rootGroup.matrix.copy(refMatrix);
-        // // rootGroup.matrixAutoUpdate = false;
-
-        const tileCenterScenePosition = this._scene.toScenePosition([ThreejsUtils.radToDeg(centerLngLat.lon), ThreejsUtils.radToDeg(centerLngLat.lat)]);
+        const centerPsition = [MathUtils.radToDeg(centerLngLat.lon), MathUtils.radToDeg(centerLngLat.lat)];
+        const tileCenterScenePosition = this._scene.toScenePosition(centerPsition);
         rootGroup.position.set(tileCenterScenePosition.x, tileCenterScenePosition.y, tileCenterScenePosition.z);
 
+        const modelMatrix = tiles.ellipsoid.getObjectFrame(centerLngLat.lat, centerLngLat.lon, centerLngLat.height, 0, 0, 0, new Matrix4(), 0);
         const modelMatrixInvert = modelMatrix.clone().invert();
         modelMatrixInvert.decompose(tiles.group.position, tiles.group.quaternion, tiles.group.scale);
 
@@ -221,8 +254,8 @@ export default class Tileset extends SceneObject {
         // tiles.group.matrixAutoUpdate = false;
 
         this.centerLngLat = {
-            lon: ThreejsUtils.radToDeg(centerLngLat.lon),
-            lat: ThreejsUtils.radToDeg(centerLngLat.lat),
+            lon: MathUtils.radToDeg(centerLngLat.lon),
+            lat: MathUtils.radToDeg(centerLngLat.lat),
         };
     }
 
@@ -255,7 +288,6 @@ export default class Tileset extends SceneObject {
         const params = { ...this.options.display, ...displayParams };
 
         if (params.errorTarget !== undefined) tiles.errorTarget = params.errorTarget;
-        if (params.errorThreshold !== undefined) tiles.errorThreshold = params.errorThreshold;
         if (params.displayActiveTiles !== undefined) tiles.displayActiveTiles = params.displayActiveTiles;
         if (params.autoDisableRendererCulling !== undefined) tiles.autoDisableRendererCulling = params.autoDisableRendererCulling;
         if (params.maxDepth !== undefined) tiles.maxDepth = params.maxDepth;

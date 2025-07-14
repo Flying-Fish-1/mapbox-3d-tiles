@@ -31,19 +31,19 @@ var map = null;
 var scene = null;
 var tileset = null;
 
-// TODO: 需要將 3dtiles 數據發布到文件服務
+const center = [118.91083364082562,32.116922266350315];
 
-const center = [121.13, 31.437];
-const tiles3DLayerUrl = 'http://localhost:8804/taicang_test_3dtiles/qingxie_3dtiles/tileset.json';
+// TODO: 需要将数据发布到服务器上，并修改url
+const tilesetOptions = {    
+    id: 'test-model1',
+    // url: 'http://localhost:8804/splat-3dtiles/NNU_2/tileset.json',
+    url: 'http://localhost:8804/splat-3dtiles/NNU_2_opt/tileset.json',
+    isGaussianSplatting: true, // 默认为 false，如果模型有3DGS效果，请设置为 true
+    maxGaussianSplatingCount: 4096 * 4096, // 当数据量大时，可调高到 8192 * 8192
+    downloadMaxJobs: 4,
+    parseMaxJobs: 1,
+};
 
-// const center = [118.912026, 32.117417];
-// const tiles3DLayerUrl = 'http://localhost:8804/NNU_test_3dtiles/tileset.json'
-
-// const center = [120.70625,31.84791];
-// const tiles3DLayerUrl = "http://localhost:8804/splat-3dtiles/YONGLIAN_2022/tileset.json";
-
-// const center = [114.02639476404397, 22.444079016023963];
-// const tiles3DLayerUrl =  "https://services1.map.gov.hk/api/3d-data/3dtiles/ntwc1_f2/tileset.json?key=ad5940a63bd344c48b0351ef1c7a905e",
 
 init();
 addGUI();
@@ -118,8 +118,7 @@ function reloadTiles() {
         tileset.remove();
     }
 
-    tileset = scene.addTileset({
-        id: 'test-tileset',
-        url: tiles3DLayerUrl,
-    });
+    tileset = scene.addTileset(tilesetOptions);
+
+    tileset.position.set(0,0,-30);
 }

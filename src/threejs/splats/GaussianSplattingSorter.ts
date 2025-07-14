@@ -10,12 +10,18 @@ export class GaussianSplattingSorter {
     depthValues: Int32Array;
     tempDepths: Int32Array;
     tempIndices: Uint32Array;
+    
+    abortController: AbortController | null = null;
 
     onmessage: ((this: GaussianSplattingSorter, ev) => any) | null = null;
 
     constructor() {}
 
     public terminate(): void {
+        if(this.abortController) {
+            this.abortController.abort();
+            this.abortController = null;
+        }
         this.vertexCount = 0;
         this.positions = null;
         this.splatIndex = null;
@@ -126,10 +132,16 @@ export class GaussianSplattingSorter {
     }
 
     public async sortDataAsync(viewProj): Promise<void> {
-        return runCoroutineAsync(this._sortData(viewProj, true), createYieldingScheduler()).then(() => {
+        this.abortController = new AbortController();
+        const signal = this.abortController.signal;
+        return runCoroutineAsync(this._sortData(viewProj, true), createYieldingScheduler(), signal).then(() => {
             if (this.onmessage) {
                 this.onmessage(this.splatIndex);
             }
+        }).catch((error) => {
+            console.error(error);
+        }).finally(() => {
+            this.abortController = null;
         });
     }
 }

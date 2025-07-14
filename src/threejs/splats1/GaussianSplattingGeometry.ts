@@ -38,9 +38,12 @@ export class GaussianSplattingGeometry {
 
         // Splat index buffer
         const splatIndexArray = new Float32Array(maxSplatCount);
-        const splatIndexes = new InstancedBufferAttribute(splatIndexArray, 1, false);
-        splatIndexes.setUsage(DynamicDrawUsage);
-        geometry.setAttribute('splatIndex', splatIndexes);
+        for (let i = 0; i < maxSplatCount; i++) {
+            splatIndexArray[i] = i;
+        }
+        const splatIndex = new InstancedBufferAttribute(splatIndexArray, 1, false);
+        splatIndex.setUsage(DynamicDrawUsage);
+        geometry.setAttribute('splatIndex', splatIndex);
 
         geometry.instanceCount = 0;
 

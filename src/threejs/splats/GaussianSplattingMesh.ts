@@ -163,7 +163,7 @@ export class GaussianSplattingMesh extends Mesh {
         this._useRGBACovariants = true;
     }
 
-    readonly isGaussianSplattingMesh: true;
+    readonly isGaussianSplattingMesh: true = true;
     /**
      * @override
      * @defaultValue `Mesh`
@@ -386,11 +386,13 @@ export class GaussianSplattingMesh extends Mesh {
         scaleBuffer: BufferAttribute | InterleavedBufferAttribute,
         rotationBuffer: BufferAttribute | InterleavedBufferAttribute,
         colorBuffer: BufferAttribute | InterleavedBufferAttribute,
+        opacityBuffer: BufferAttribute | InterleavedBufferAttribute,
         covA: Uint16Array,
         covB: Uint16Array,
         colorArray: Uint8Array,
         minimum: Vector3,
         maximum: Vector3,
+        colorIsFloat: boolean = false
     ): void {
         const i = sourceIndex;
 
@@ -398,6 +400,8 @@ export class GaussianSplattingMesh extends Mesh {
         const quaternion = this._tempQuaternion;
         const scale = this._tempScale;
         const color = this._tempColor;
+
+        const colorScale = colorIsFloat ? 255 : 1;
 
         position.x = positionBuffer.getX(i);
         position.y = positionBuffer.getY(i);
@@ -410,10 +414,10 @@ export class GaussianSplattingMesh extends Mesh {
         quaternion.z = rotationBuffer.getZ(i);
         quaternion.w = rotationBuffer.getW(i);
         quaternion.normalize();
-        color[0] = colorBuffer.getX(i);
-        color[1] = colorBuffer.getY(i);
-        color[2] = colorBuffer.getZ(i);
-        color[3] = colorBuffer.getW(i);
+        color[0] = colorBuffer.getX(i) * colorScale;
+        color[1] = colorBuffer.getY(i) * colorScale;
+        color[2] = colorBuffer.getZ(i) * colorScale;
+        color[3] = (opacityBuffer ? opacityBuffer.getX(i) : colorBuffer.getW(i) ) * colorScale;
 
         this._makeSplatFromComonents(sourceIndex, destinationIndex, position, scale, quaternion, color, covA, covB, colorArray, minimum, maximum);
     }
@@ -588,8 +592,10 @@ export class GaussianSplattingMesh extends Mesh {
         const positionBuffer = geometry.getAttribute('position');
         const scaleBuffer = geometry.getAttribute('scale');
         const colorBuffer = geometry.getAttribute('color');
+        const opacityBuffer = geometry.getAttribute('opacity');
         const rotationBuffer = geometry.getAttribute('rotation');
 
+        let colorIsFloat = colorBuffer.array instanceof Float32Array;
         let colorNormalized = colorBuffer.normalized;
         colorBuffer.normalized = false;
 
@@ -619,7 +625,7 @@ export class GaussianSplattingMesh extends Mesh {
 
         {
             for (let i = 0; i < vertexCount; i++) {
-                this._makeSplatFromAttribute(i, i, positionBuffer, scaleBuffer, rotationBuffer, colorBuffer, covA, covB, colorArray, minimum, maximum);
+                this._makeSplatFromAttribute(i, i, positionBuffer, scaleBuffer, rotationBuffer, colorBuffer, opacityBuffer, covA, covB, colorArray, minimum, maximum, colorIsFloat);
                 if (isAsync && i % GaussianSplattingMesh._SplatBatchSize === 0) {
                     yield;
                 }
@@ -732,7 +738,7 @@ export class GaussianSplattingMesh extends Mesh {
         // }
 
         if (height > width) {
-            //Logger.Error("GaussianSplatting texture size: (" + width + ", " + height + "), maxTextureSize: " + width);
+            console.error("GaussianSplatting texture size: (" + width + ", " + height + "), maxTextureSize: " + width);
             height = width;
         }
 

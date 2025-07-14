@@ -72,7 +72,7 @@ function init() {
             rootUrl: './data/splats/',
             fileNames: 'surveyhouse.splat',
             position: [118.9062412507131, 32.10569531706962],
-            rotation: [-90, 0, 0],
+            rotation: [0, 0, 0],
             scale: 1,
             offset: [0, 0, -30],
         });

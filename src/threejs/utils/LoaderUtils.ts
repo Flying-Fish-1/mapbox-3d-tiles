@@ -1,5 +1,6 @@
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
 export class LoaderUtils {
     static _dracoLoader: DRACOLoader | null = null;
@@ -30,5 +31,9 @@ export class LoaderUtils {
         }
 
         return this._ktx2Loader;
+    }
+
+    static getMeshoptDecoder(meshoptDecoder) {
+        return meshoptDecoder || MeshoptDecoder;
     }
 }
