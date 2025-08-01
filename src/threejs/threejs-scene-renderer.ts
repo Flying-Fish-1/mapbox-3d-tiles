@@ -1,7 +1,5 @@
 import { type Map as MapboxMap } from 'mapbox-gl';
 
-import ThreejsUtils from './threejs-utils';
-
 import { WebGLRenderer } from 'three';
 
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -14,9 +12,33 @@ export default class ThreejsSceneRenderer {
     constructor(map: MapboxMap, gl: WebGL2RenderingContext) {
         this._map = map;
 
-        ThreejsUtils.initRenderer({ map, gl });
-        this._renderer = ThreejsUtils.getRenderer();
-        this._labelRenderer = ThreejsUtils.getLabelRenderer();
+        // Only create one threejs instance per context
+        if (this._renderer && this._labelRenderer) {
+            return;
+        }
+
+        let renderer: WebGLRenderer = new WebGLRenderer({
+            alpha: true,
+            antialias: true,
+            canvas: map.getCanvas(),
+            context: gl,
+        });
+
+        renderer.shadowMap.enabled = true;
+        renderer.autoClear = false;
+
+        let labelRenderer: CSS2DRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(map._containerWidth, map._containerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        map._container.appendChild(labelRenderer.domElement);
+        map.on('resize', () => {
+            labelRenderer.setSize(map._containerWidth, map._containerHeight);
+        });
+
+        this._renderer = renderer;
+        this._labelRenderer = labelRenderer;
     }
 
     getRenderer() {
