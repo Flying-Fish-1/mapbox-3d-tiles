@@ -1,43 +1,47 @@
 {
-  "name": "mapbox-3d-tiles",
-  "version": "1.0.0",
-  "author": "Jianshun Yang",
-  "license": "MIT",
-  "description": "Integrate NASA's 3d-tiles-renderer with mapbox-gl to enable 3D tiles rendering and provide plugin functionalities.",
-  "keywords": [
-    "mapbox-gl",
-    "3dtiles",
-    "3d-tiles-renderer",
-    "threejs"
-  ],
-  "type": "module",
-  "files": [
-    "dist",
-    "README.md"
-  ],
-  "main": "./dist/mapbox-3d-tiles.umd.js",
-  "module": "./dist/mapbox-3d-tiles.mjs",
-  "types": "./dist/index.d.ts",
-  "exports": {
+    "name": "mapbox-3d-tiles",
+    "version": "1.0.0",
+    "author": "Jianshun Yang",
+    "license": "MIT",
+    "private": false,
+    "description": "Integrate threejs with mapbox-gl to enable 3dtiles / 3dgs / gltf rendering.",
+    "keywords": [
+        "mapbox-gl",
+        "3dtiles",
+        "3d-tiles-renderer",
+        "threejs"
+    ],
+    "type": "module",
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "main": "./dist/mapbox-3d-tiles.umd.js",
+    "module": "./dist/mapbox-3d-tiles.mjs",
     "types": "./dist/index.d.ts",
-    "import": "./dist/mapbox-3d-tiles.mjs",
-    "require": "./dist/mapbox-3d-tiles.umd.js"
-  },
-  "scripts": {
-    "dev": "vite serve example",
-    "build": "tsc && vite build"
-  },
-  "sideEffects": false,
-  "dependencies": {
-    "3d-tiles-renderer": "^0.4.11",
-    "mapbox-gl": "^3.10.0",
-    "utility-types": "^3.11.0"
-  },
-  "devDependencies": {
-    "@types/node": "^18.17.0",
-    "@types/three": "^0.178.1",
-    "typescript": "^5.7.2",
-    "vite": "^6.2.0",
-    "vite-plugin-dts": "^4.5.4"
-  }
+    "exports": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/mapbox-3d-tiles.mjs",
+        "require": "./dist/mapbox-3d-tiles.umd.js"
+    },
+    "scripts": {
+        "dev": "vite serve example",
+        "build": "tsc && vite build"
+    },
+    "sideEffects": false,
+    "dependencies": {
+        "3d-tiles-renderer": "^0.4.11",
+        "utility-types": "^3.11.0"
+    },
+    "peerDependencies": {
+        "three": ">=0.166.0",
+        "mapbox-gl": "^3.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^18.17.0",
+        "@types/three": "^0.178.1",
+        "typescript": "^5.7.2",
+        "vite": "^6.2.0",
+        "vite-plugin-dts": "^4.5.4"
+    }
 }
