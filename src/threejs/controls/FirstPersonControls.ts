@@ -7,6 +7,7 @@ import { FollowCameraHandle } from './FollowCameraHandle';
 import { bindAll, extend } from '../utils/Util';
 import { BaseControls } from './BaseControls';
 import { CameraOptions } from 'mapbox-gl';
+import { updateMapCameraPosition } from './ControlUtils';
 
 export type FirstPersonControlsOptions = {
     model?: Object3D;
@@ -133,28 +134,7 @@ export class FirstPersonControls extends BaseControls {
         this.character.update(time);
         this.followCamera.update(time);
 
-        const map = this.scene.getMap();
-
-        const targetPosition = this.followCamera.getTargetPosition();
-        const cameraPosition = this.followCamera.getCameraPosition();
-        const cameraBearing = this.followCamera.cameraBearing;
-        const cameraPitch = this.followCamera.cameraPitch;
-
-        const cameraToTargetDistance = new Vector3().subVectors(cameraPosition, targetPosition).length();
-        const targetMapPosition = this.scene.toMapPosition(targetPosition);
-        // const targetMercatorCoordinate = this.scene.toMercatorCoordinate(new Vector3(targetPosition.x, targetPosition.y, cameraToTargetDistance));
-
-        // const cameraMercatorZ = targetMercatorCoordinate.z;
-        const cameraMercatorZ = (map.transform.pixelsPerMeter / map.transform.worldSize) * cameraToTargetDistance;
-        const zoom = map.transform._zoomFromMercatorZ(cameraMercatorZ);
-
-        this.mapCameraPosition = {
-            // @ts-ignore
-            center: targetMapPosition,
-            bearing: cameraBearing,
-            pitch: cameraPitch,
-            zoom: zoom,
-        };
+        this.mapCameraPosition = updateMapCameraPosition(this.scene, this.followCamera);
 
         return this.mapCameraPosition;
     }

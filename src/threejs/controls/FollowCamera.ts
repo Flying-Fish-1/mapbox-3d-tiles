@@ -8,7 +8,7 @@ export class FollowCamera {
     cameraBearing: number = 0;
     cameraDistance: number = 10;
 
-    cameraMaxDistance: number = 100;
+    cameraMaxDistance: number = 10000;
     cameraMinDistance: number = 1;
     cameraMaxPitch: number = 85;
     cameraMinPitch: number = 0;

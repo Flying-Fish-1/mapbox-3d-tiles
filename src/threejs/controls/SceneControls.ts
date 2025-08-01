@@ -1,8 +1,11 @@
-import { FirstPersonControls, FirstPersonControlsOptions } from './FirstPersonControls';
 import { ThreejsSceneLayer } from '../threejs-scene';
+import { FirstPersonControls, FirstPersonControlsOptions } from './FirstPersonControls';
 
-export type ControlsOptions = { type } & (FirstPersonControlsOptions | undefined);
-export type Controls = FirstPersonControls | undefined;
+import { AlongPathControls, AlongPathControlsOptions } from './AlongPathControls';
+import { AroundPointControls, AroundPointControlsOptions } from './AroundPointControls';
+
+export type ControlsOptions = { type } & (FirstPersonControlsOptions | AlongPathControlsOptions | AroundPointControlsOptions | undefined);
+export type Controls = FirstPersonControls | AlongPathControls | AroundPointControls | undefined;
 
 export class SceneControls {
     private _scene: ThreejsSceneLayer;
@@ -18,6 +21,12 @@ export class SceneControls {
         switch (controlsOptions.type) {
             case 'firstPerson':
                 threeControls = new FirstPersonControls(this._scene, controlsOptions);
+                break;
+            case 'alongPath':
+                threeControls = new AlongPathControls(this._scene, controlsOptions);
+                break;
+            case 'aroundPoint':
+                threeControls = new AroundPointControls(this._scene, controlsOptions);
                 break;
         }
 
