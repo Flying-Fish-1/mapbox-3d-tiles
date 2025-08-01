@@ -155,7 +155,6 @@ export default class Model extends SceneObject {
                     const dracoLoader = LoaderUtils.getDracoLoader(this._options.dracoLoaderPath);
                     const ktxLoader = LoaderUtils.getKtxLoader(this._options.ktx2LoaderPath);
 
-                    // @ts-expect-error
                     ktxLoader.detectSupport(this._scene.getWebGLRenderer());
 
                     const loader = new GLTFLoader();

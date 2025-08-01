@@ -5,7 +5,6 @@ export class TilesCachePlugin {
     constructor(options = {}) {}
 
     init(tiles: TilesRenderer) {
-        //@ts-expect-error
         tiles.lruCache.maxBytesSize = Infinity;
         tiles.lruCache.minSize = 0;
         tiles.lruCache.maxSize = Infinity;

@@ -49,15 +49,15 @@ export function inlineScheduler<T>(coroutine: AsyncCoroutine<T>, onStep: (stepRe
             onStep(step);
         } else if (!step.value) {
             // NOTE: The properties of step have been narrowed, but the type of step itself is not narrowed, so the cast below is the most type safe way to deal with this without instantiating a new object to hold the values.
+            //@ts-ignore
             onStep(step as { done: typeof step.done; value: typeof step.value });
         } else {
+            //@ts-ignore
             step.value.then(() => {
                 step.value = undefined;
-                onStep(
-                    step as {
-                        done: typeof step.done;
-                        value: typeof step.value;
-                    },
+                onStep(            
+                    //@ts-ignore
+                    step as { done: typeof step.done; value: typeof step.value; },
                 );
             }, onError);
         }

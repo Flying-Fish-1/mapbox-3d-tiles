@@ -1,0 +1,52 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": false,
+        "esModuleInterop": true,
+        "incremental": true,
+        "moduleDetection": "force",
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "resolveJsonModule": true,
+        "verbatimModuleSyntax": false,
+        "target": "es2022",
+        "useDefineForClassFields": false,
+        "module": "ESNext",
+        "lib": [
+            "ESNext",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "skipLibCheck": true,
+        "moduleResolution": "bundler",
+        /* Bundler mode */
+        "allowImportingTsExtensions": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        /* Linting */
+        "strict": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": false,
+        "sourceMap": true,
+        "declaration": true,
+        "allowSyntheticDefaultImports": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "declarationDir": "dist/types",
+        "outDir": "dist/lib",
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ]
+        }
+    },
+    "include": [
+        "src"
+    ]
+}
