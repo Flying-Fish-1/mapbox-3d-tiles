@@ -11,24 +11,33 @@
     "threejs"
   ],
   "type": "module",
-  "sideEffects": false,
-  "main": "src/index.js",
-  "module": "src/index.js",
   "files": [
-    "src/*"
+    "dist",
+    "README.md"
   ],
+  "main": "./dist/mapbox-3d-tiles.umd.js",
+  "module": "./dist/mapbox-3d-tiles.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.js"
+    "types": "./dist/index.d.ts",
+    "import": "./dist/mapbox-3d-tiles.mjs",
+    "require": "./dist/mapbox-3d-tiles.umd.js"
   },
   "scripts": {
-    "start": "vite --config ./vite.config.js",
-    "build-examples": "vite build --config ./vite.config.js"
+    "dev": "vite serve example",
+    "build": "tsc && vite build"
   },
+  "sideEffects": false,
   "dependencies": {
     "3d-tiles-renderer": "^0.4.11",
-    "mapbox-gl": "^3.10.0"
+    "mapbox-gl": "^3.10.0",
+    "utility-types": "^3.11.0"
   },
   "devDependencies": {
-    "vite": "^6.2.0"
+    "@types/node": "^18.17.0",
+    "@types/three": "^0.178.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.2.0",
+    "vite-plugin-dts": "^4.5.4"
   }
 }

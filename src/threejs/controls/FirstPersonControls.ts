@@ -1,4 +1,4 @@
-import ThreejsSceneLayer from '../threejs-scene';
+import { ThreejsSceneLayer } from '../threejs-scene';
 import { AnimationAction, AnimationMixer, Object3D, Vector3 } from 'three';
 import { Character } from './Character';
 import { CharacterHandle } from './CharacterHandle';

@@ -1,5 +1,5 @@
 import { CatmullRomCurve3, Group, Matrix4, Object3D, Vector3 } from 'three';
-import ThreejsSceneLayer from '../threejs-scene';
+import { ThreejsSceneLayer } from '../threejs-scene';
 import { SceneRecenterEvent, SceneRecenterEventType, SceneUpdateEvent, SceneUpdateEventType } from './scene-event';
 
 function onSceneUpdate() {}

@@ -7,7 +7,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // import { GLTFLoader } from "../tileset/plugins/gltf/GLTFLoader.js";
 
 import { SceneObject } from '../object/scene-object';
-import ThreejsSceneLayer from '../threejs-scene';
+import { ThreejsSceneLayer } from '../threejs-scene';
 // import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 // import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 
@@ -25,9 +25,9 @@ import { GLTFGaussianSplattingExtension } from '../splats/GLTFGaussianSplattingE
 
 export type ModelOptions = {
     id: string;
-    rootUrl: string;
-    fileName: string | null | undefined;
-    fileNames: string | readonly string[] | null | undefined;
+    rootUrl?: string;
+    fileName?: string | null | undefined;
+    fileNames?: string | readonly string[] | null | undefined;
     position: number[];
     offset?: number[];
     rotation?: number[];
@@ -38,7 +38,7 @@ export type ModelOptions = {
     callback?: (model: Group) => void;
 };
 
-export default class Model extends SceneObject {
+export class Model extends SceneObject {
     _options: ModelOptions;
 
     _animGroup: Group | undefined;

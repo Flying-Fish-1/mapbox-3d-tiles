@@ -8,8 +8,8 @@ import ThreejsUtils from './threejs-utils';
 import { Position } from './threejs-types';
 
 import { SceneRecenterEventType, SceneUpdateEventType } from './object/scene-event.js';
-import Tileset, { TilesetOptions } from './tileset/tileset';
-import Model, { ModelOptions } from './model/model';
+import { Tileset, TilesetOptions } from './tileset/tileset';
+import { Model, ModelOptions } from './model/model';
 
 import { ControlsOptions, SceneControls } from './controls/SceneControls';
 
@@ -22,7 +22,7 @@ export type ThreejsSceneLayerProps = {
     createLight?: boolean;
 };
 
-export default class ThreejsSceneLayer implements CustomLayerInterface {
+export class ThreejsSceneLayer implements CustomLayerInterface {
     readonly id: string;
     readonly type: 'custom' = 'custom';
     readonly slot?: string;

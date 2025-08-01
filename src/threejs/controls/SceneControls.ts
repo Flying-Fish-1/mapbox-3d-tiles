@@ -1,9 +1,5 @@
-import { Map } from 'mapbox-gl';
 import { FirstPersonControls, FirstPersonControlsOptions } from './FirstPersonControls';
-import { Camera } from 'three';
-import ThreejsSceneLayer from '../threejs-scene';
-import { SceneUpdateEvent, SceneUpdateEventType } from '../object/scene-event';
-import { FollowCamera } from './FollowCamera';
+import { ThreejsSceneLayer } from '../threejs-scene';
 
 export type ControlsOptions = { type } & (FirstPersonControlsOptions | undefined);
 export type Controls = FirstPersonControls | undefined;

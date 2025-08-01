@@ -19,7 +19,7 @@ import { MathUtils, Box3, Vector3, Matrix4, Group, Sphere, Vector2 } from 'three
 
 import { LoaderUtils } from '../utils/LoaderUtils';
 import { SceneObject } from '../object/scene-object';
-import ThreejsSceneLayer from '../threejs-scene';
+import { ThreejsSceneLayer } from '../threejs-scene';
 // import { GLTFGaussianSplattingExtension } from '../splats/GLTFGaussianSplattingExtension';
 // import { GaussianSplattingTilesetPlugin } from '../splats/GaussianSplattingTilesetPlugin';
 // import { GLTFGaussianSplattingSpzExtension } from '../splats/GLTFGaussianSplattingSpzExtension';
@@ -91,7 +91,7 @@ export type TilesetOptions = {
     onLoadTileset?: (tileset: Tileset) => void;
 };
 
-export default class Tileset extends SceneObject {
+export class Tileset extends SceneObject {
     group: Group | undefined;
     tiles: TilesRenderer | undefined;
     options: TilesetOptions;

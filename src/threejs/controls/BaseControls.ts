@@ -1,5 +1,5 @@
 import { SceneUpdateEvent, SceneUpdateEventType } from '../object/scene-event';
-import ThreejsSceneLayer from '../threejs-scene';
+import { ThreejsSceneLayer } from '../threejs-scene';
 
 export class BaseControls {
     scene: ThreejsSceneLayer;
