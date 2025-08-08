@@ -1,4 +1,4 @@
-import ThreejsSceneLayer from '../threejs-scene';
+import { ThreejsSceneLayer } from '../threejs-scene';
 import { Position } from '../threejs-types';
 import { extend } from '../utils/Util';
 import { BaseControls } from './BaseControls';
@@ -59,10 +59,6 @@ export class AlongPathControls extends BaseControls {
             this._time = 0;
             this._path = new CatmullRomCurve3(this.options.points, this.options.pathClose);
         }
-    }
-    
-    override reset() {
-        this._time = 0;
     }
 
     override update(time: number) {

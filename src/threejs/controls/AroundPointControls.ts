@@ -1,4 +1,4 @@
-import ThreejsSceneLayer from '../threejs-scene';
+import { ThreejsSceneLayer } from '../threejs-scene';
 import { Position } from '../threejs-types';
 import { extend } from '../utils/Util';
 import { BaseControls } from './BaseControls';
@@ -53,10 +53,6 @@ export class AroundPointControls extends BaseControls {
         if (this.options.point) {
             this._time = 0;
         }
-    }
-
-    override reset() {
-        this._time = 0;
     }
     
     override update(time: number) {

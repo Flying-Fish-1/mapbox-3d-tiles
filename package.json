@@ -1,6 +1,6 @@
 {
     "name": "mapbox-3d-tiles",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "author": "Jianshun Yang",
     "license": "MIT",
     "private": false,
@@ -31,6 +31,7 @@
     "sideEffects": false,
     "dependencies": {
         "3d-tiles-renderer": "^0.4.11",
+        "three-custom-shader-material": "^6.3.1",
         "utility-types": "^3.11.0"
     },
     "peerDependencies": {

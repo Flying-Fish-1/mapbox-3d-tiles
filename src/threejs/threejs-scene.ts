@@ -7,9 +7,15 @@ import ThreejsSceneHelper from './threejs-scene-helper';
 import ThreejsUtils from './threejs-utils';
 import { Position } from './threejs-types';
 
-import { SceneRecenterEventType, SceneUpdateEventType } from './object/scene-event.js';
+import { SceneRecenterEventType, SceneUpdateEventType } from './object/scene-event';
 import { Tileset, TilesetOptions } from './tileset/tileset';
 import { Model, ModelOptions } from './model/model';
+import { MeshObject, MeshOptions } from './mesh/mesh';
+
+import { LabelOptions, LabelObject } from './object/object-label';
+import { PathOptions, PathObject } from './object/object-path';
+import { MarkerOptions, MarkerObject } from './object/object-marker';
+import { HeatmapObject, HeatmapOptions } from './object/object-heatmap';
 
 import { ControlsOptions, SceneControls } from './controls/SceneControls';
 
@@ -276,5 +282,25 @@ export class ThreejsSceneLayer implements CustomLayerInterface {
 
     addModel(modelOptions: ModelOptions): Model {
         return new Model(modelOptions).addToScene(this);
+    }
+
+    addMesh(meshOptions: MeshOptions): MeshObject {
+        return new MeshObject(meshOptions).addToScene(this);
+    }
+
+    addLabel(object: Object3D, options: LabelOptions): LabelObject {
+        return new LabelObject(object, options).addToScene(this);
+    }
+
+    addPath(object: Object3D, options: PathOptions): PathObject {
+        return new PathObject(object, options).addToScene(this);
+    }
+
+    addMarker(options: MarkerOptions): MarkerObject {
+        return new MarkerObject(options).addToScene(this);
+    }
+
+    addHeatmap(options: HeatmapOptions): HeatmapObject {
+        return new HeatmapObject(options).addToScene(this);
     }
 }

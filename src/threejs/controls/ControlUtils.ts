@@ -1,6 +1,6 @@
 import { Vector3 } from 'three';
 import { FollowCamera } from './FollowCamera';
-import ThreejsSceneLayer from '../threejs-scene';
+import { ThreejsSceneLayer } from '../threejs-scene';
 import { CameraOptions } from 'mapbox-gl';
 
 export function updateMapCameraPosition(scene: ThreejsSceneLayer, followCamera: FollowCamera) : CameraOptions {
