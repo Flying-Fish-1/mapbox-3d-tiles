@@ -5,8 +5,10 @@ import { getFeatureData, SourceInfo, type FeatureData } from '../geometry/geojso
 
 import { mergeGeometries } from '../geometry/BufferGeometryUtils';
 
+export type CircleMaterialType = 'ripple' |'spread' | 'radar';
+
 export type CircleOptions = {
-    material?: Material | string | undefined;
+    material?: Material | CircleMaterialType | undefined;
     color?: ColorRepresentation | undefined;
     opacity?: number | undefined;
 
