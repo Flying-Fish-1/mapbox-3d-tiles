@@ -345,10 +345,10 @@ export async function loadGeojson(dataFile: string | GeoJSON | Geometry[]): Prom
         if (Array.isArray(dataFile)) {
             data = {
                 type: 'GeometryCollection',
-                geometries: dataFile,
+                geometries: structuredClone(dataFile),
             };
         } else {
-            data = dataFile;
+            data = structuredClone(dataFile);
         }
     }
 
