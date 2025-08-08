@@ -12098,8 +12098,8 @@ async function qd(a) {
   } else
     Array.isArray(a) ? e = {
       type: "GeometryCollection",
-      geometries: a
-    } : e = a;
+      geometries: structuredClone(a)
+    } : e = structuredClone(a);
   const t = (r, o, c) => (r.__source = {
     object: o,
     index: c
@@ -16643,7 +16643,7 @@ class eA {
   constructor(e) {
     this.type = "custom", this.renderingMode = "3d", this.onAdd = (t, s) => {
       var o;
-      this._map = t, this._map.transform.setOrthographicProjectionAtLowPitch(!1), this._scene = this._helper.createScene(this._options.createLight || !0), this._sceneRoot = this._helper.createGroup(this._scene, "scene-root"), this._camera = this._helper.createCamera(this._sceneRoot, "camera-for-render"), this._renderer = new $A(t, s);
+      this._map = t, this._map.transform.setOrthographicProjectionAtLowPitch(!1), this._scene = this._helper.createScene(this._options.createLight ?? !0), this._sceneRoot = this._helper.createGroup(this._scene, "scene-root"), this._camera = this._helper.createCamera(this._sceneRoot, "camera-for-render"), this._renderer = new $A(t, s);
       const n = this._options.refCenter || ((o = this._map) == null ? void 0 : o.getCenter());
       this.setRefCenter(n);
       const i = this._options.envTexture;

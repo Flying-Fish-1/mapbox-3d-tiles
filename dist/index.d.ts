@@ -144,12 +144,14 @@ declare type BuildingOptions = {
     };
 };
 
+declare type CircleMaterialType = 'ripple' | 'spread' | 'radar';
+
 declare type CircleMeshOptions = {
     type: 'circle';
 } & CircleOptions;
 
 declare type CircleOptions = {
-    material?: Material | string | undefined;
+    material?: Material | CircleMaterialType | undefined;
     color?: ColorRepresentation | undefined;
     opacity?: number | undefined;
     radius?: number | undefined;
