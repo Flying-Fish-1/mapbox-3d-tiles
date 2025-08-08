@@ -73,7 +73,7 @@ export class ThreejsSceneLayer implements CustomLayerInterface {
 
         this._map.transform.setOrthographicProjectionAtLowPitch(false);
 
-        this._scene = this._helper.createScene(this._options.createLight || true);
+        this._scene = this._helper.createScene(this._options.createLight ?? true);
         this._sceneRoot = this._helper.createGroup(this._scene, 'scene-root');
         this._camera = this._helper.createCamera(this._sceneRoot, 'camera-for-render');
 
