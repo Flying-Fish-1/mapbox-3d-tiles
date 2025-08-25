@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>Mapbox 3D Tiles 简化示例 (无LOD优化)</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .info-panel h3 {
+            margin: 0 0 8px 0;
+            color: #ffa726;
+            font-size: 14px;
+        }
+        
+        .warning {
+            color: #ff5722;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="info-panel">
+        <h3>🚀 简化版本特性</h3>
+        <div>📍 地理位置: 经度 114.215323°, 纬度 22.690555°</div>
+        <div>🏢 香港中文大学深圳 - 行政楼</div>
+        <br>
+        <div class="warning">⚠️ 性能说明:</div>
+        <div>• 无高斯点云数量限制</div>
+        <div>• 无并发下载控制</div>
+        <div>• 无LRU缓存策略</div>
+        <div>• 浅层LOD (maxDepth=5)</div>
+        <div>• 高错误阈值 (errorTarget=100)</div>
+        <br>
+        <div>💡 此版本类似直接加载模式，性能较低但实现简单</div>
+    </div>
+
+    <script type="module" src="./addTilesetExample_simple.js"></script>
+</body>
+</html>

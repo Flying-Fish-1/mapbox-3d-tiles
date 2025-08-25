@@ -709,7 +709,7 @@ export { }
 declare module 'three' {
     export interface Object3D {
         userData: {
-            structuralMetadata?: StructuralMetadata;
+            meshFeatures?: MeshFeatures;
         };
     }
 }
@@ -719,7 +719,7 @@ declare module 'three' {
 declare module 'three' {
     export interface Object3D {
         userData: {
-            meshFeatures?: MeshFeatures;
+            structuralMetadata?: StructuralMetadata;
         };
     }
 }

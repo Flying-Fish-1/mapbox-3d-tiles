@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>mapbox 3d tiles example (Clean Version)</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="./main.css">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f0f0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+            z-index: 1000;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .status-good { color: #27ae60; font-weight: bold; }
+        .status-warning { color: #f39c12; font-weight: bold; }
+        .status-error { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    
+    <div class="info-panel">
+        <h3>🏢 Administration Building - 3D Tiles (Clean)</h3>
+        <p><strong>数据源:</strong> 香港中文大学深圳行政楼</p>
+        <p><strong>技术:</strong> 3D Gaussian Splatting</p>
+        <p><strong>地理位置:</strong> 经度 114.215323°, 纬度 22.690555°</p>
+        <p><strong>版本:</strong> 简化版 (无复杂调试功能)</p>
+        <p class="status-good">✅ 数据已正确预设位置和旋转</p>
+        <p><strong>特点:</strong></p>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+            <li>保留位置调整功能</li>
+            <li>保留原示例调试选项</li>
+            <li>移除复杂调试代码</li>
+            <li>简洁的GUI界面</li>
+        </ul>
+    </div>
+
+    <script type="module" src="./addTilesetExample_clean.js"></script>
+</body>
+
+</html>
